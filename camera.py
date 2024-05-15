@@ -6,8 +6,8 @@ import sys
 
 
 def camera_setup(picam, length=960, height=540):
-    picam.configure(picam2.create_preview_configuration({"size": (length,height)}))
-    picam.start_preview(Preview.QTGL)
+    # picam.configure(picam.create_preview_configuration({"size": (length,height)}))
+    # picam.start_preview(Preview.NONE)
     picam.start()
 
 def take_picture(picam):
@@ -60,10 +60,13 @@ def get_img_direction(src, mask)->list:
             # en dessous du bord inférieur : src[y+h+i_, x+(w//2)]
 
             for i_ in range(1,6):
-                pxl_east = src[y+(h//2), x+w+i_]
-                pxl_west = src[y+(h//2), x-i_]
-                pxl_north = src[y-i_, x+(w//2)]
-                pxl_south = src[y+h+i_, x+(w//2)]
+		try:
+                    pxl_east = src[y+(h//2), x+w+i_]
+               	    pxl_west = src[y+(h//2), x-i_]
+                    pxl_north = src[y-i_, x+(w//2)]
+                    pxl_south = src[y+h+i_, x+(w//2)]
+		except Exception as exc: 
+		    continue
 
                 if sum(pxl_east)-255 < 240 : # Si ligne noire à l'Est alors vert à l'Ouest
                     directions["West"]+=1
