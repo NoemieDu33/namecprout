@@ -98,6 +98,8 @@ def get_img_direction(src, mask)->list:
             #     else:
             #         list_final_directions.append("N-W")
 
+    if not len(list_final_directions):
+        print("Rien?!")
     if len(list_final_directions)==1:
         print(list_final_directions[0])
         if list_final_directions[0]=="S-W":
@@ -108,6 +110,7 @@ def get_img_direction(src, mask)->list:
         if "S-E" and "S-W" in list_final_directions:
             print("S-Both")
             print("DEMI TOUR !")
+    
 
     
             # cv.circle(src, center_of_rectangle, 4, (255, 0, 0), 4)
