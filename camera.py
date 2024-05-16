@@ -45,6 +45,8 @@ class Cam:
     @staticmethod
     def get_img_direction(src, mask)->list:
 
+        colored_src_printable = cv.cvtColor(src, cv.COLOR_HSV2BGR)
+
         list_green_squares = []
 
         contours_green, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -89,7 +91,7 @@ class Cam:
 
 
 
-                cv.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                cv.rectangle(colored_src_printable, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 
         list_final_directions = []
 
@@ -122,7 +124,7 @@ class Cam:
         
                 # cv.circle(src, center_of_rectangle, 4, (255, 0, 0), 4)
                 # cv.line(src, (src.shape[1]//2, src.shape[0]), center_of_rectangle,(0,0,255),2)
-        return (src, list_final_directions)
+        return (colored_src_printable, list_final_directions)
 
 
 
