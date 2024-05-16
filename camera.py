@@ -43,7 +43,7 @@ class Cam:
 
     @staticmethod
     def get_img_direction(src, mask)->list:
-        print("BEGIN PRINT")
+        print("-----\nBEGIN PRINT")
 
         list_green_squares = []
 
@@ -92,7 +92,7 @@ class Cam:
                 cv.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 3)
                 
         list_final_directions = []
-        print(f"{list_green_squares=}", "\n------------\n")
+        print(f"{list_green_squares=}", "\n-")
         for elt in list_green_squares:
             if elt["South"]>elt["North"]:
                 if elt["East"]>elt["West"]:
@@ -104,7 +104,8 @@ class Cam:
                 #         list_final_directions.append("N-E")
                 #     else:
                 #         list_final_directions.append("N-W")
-
+            else:
+                print("North")
         if not len(list_final_directions):
             print("Rien?!")
         if len(list_final_directions)==1:
