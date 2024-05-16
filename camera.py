@@ -14,7 +14,7 @@ class Cam:
         # config = self.picam.create_preview_configuration(sensor={'output_size': mode['size']})
         # self.picam.configure(config)
         cfg = self.picam.create_still_configuration()
-        self.picam.cinfigure(cfg)
+        self.picam.configure(cfg)
         # self.picam.start_preview(Preview.NULL)
         self.picam.start()
 
