@@ -5,7 +5,7 @@ class Move:
     def __init__(self):
         self.__pc = Cam()
         self.__pc.camera_setup()
-        self.final = None
+        self.final = []
         
     def turn_left(self,t):
         pass
@@ -22,7 +22,7 @@ class Move:
         self.final, res = self.__pc.get_img_direction(src=src, mask=msk)
 
     def end_this(self):
-        if self.final!=None:
+        if any(self.final):
             self.__pc.save_image(src=self.final)
     
 
