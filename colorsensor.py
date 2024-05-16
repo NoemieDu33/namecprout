@@ -1,9 +1,9 @@
 import RPi.GPIO as GPIO
 import time
 
-s2 = 23
-s3 = 24
-signal = 25
+s2 = 22
+s3 = 27
+signal = 17
 NUM_CYCLES = 10
 
 
