@@ -8,7 +8,7 @@ class Cam:
     def __init__(self):
         self.picam = Picamera2()
             
-    def camera_setup(self, length=960, height=540):
+    def camera_setup(self, length=800, height=800):
         self.picam.configure(self.picam.create_preview_configuration({"size": (length,height)}))
         self.picam.start_preview(Preview.NULL)
         self.picam.start()
