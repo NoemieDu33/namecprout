@@ -5,6 +5,7 @@ class Move:
     def __init__(self):
         self.__pc = Cam()
         self.__pc.camera_setup()
+        self.final = None
         
     def turn_left(self,t):
         pass
@@ -18,10 +19,11 @@ class Move:
     def detect_green(self):
         src = self.__pc.take_picture()
         msk = self.__pc.process_image(src)
-        res = self.__pc.get_img_direction(src=src, mask=msk)[1]
+        self.final, res = self.__pc.get_img_direction(src=src, mask=msk)[1]
 
     def end_this(self):
-        self.__pc.save_image()
+        if not (isinstance(self.final, None)):
+            self.__pc.save_image(src=self.final)
     
 
 if __name__=="__main__":
