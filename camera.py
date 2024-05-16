@@ -4,127 +4,122 @@ from picamera2 import MappedArray, Picamera2, Preview
 import math
 import sys
 
-
-def camera_setup(picam, length=960, height=540):
-    picam.configure(picam.create_preview_configuration({"size": (length,height)}))
-    picam.start_preview(Preview.NULL)
-    picam.start()
-
-def take_picture(picam):
-   array = picam.capture_array()
-   return array
-
-
-
-def show_image(src):
-    src = cv.resize(src, (960,540))
-    cv.namedWindow("NAMeC",cv.WND_PROP_FULLSCREEN)
-    cv.setWindowProperty("NAMeC",cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
-    cv.imshow("NAMeC", src)
-    cv.waitKey(0)
-
-#-----------------------------------
-    
-def process_image(src):
-    hsv = cv.cvtColor(src, cv.COLOR_BGR2HSV)
-
-    lower_green = np.array([40, 20, 50])
-    upper_green = np.array([90, 255, 255])
-
-    # create a mask for green color
-    mask_green = cv.inRange(hsv, lower_green, upper_green)
-    return mask_green
-
-
-def get_img_direction(src, mask)->list:
-
-    list_green_squares = []
-
-    contours_green, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    # loop through the green contours and draw a rectangle around them
-    for cnt in contours_green:
-        contour_area = cv.contourArea(cnt)
-        if contour_area > 2000: # Si faux positif: augmenter, si faux nÃ©gatif: rÃ©duire. Default: 1000
-            x, y, w, h = cv.boundingRect(cnt)
-
-            directions = {
-                "South" : 0,
-                "North" : 0,
-                "West" : 0,
-                "East" : 0
-            }
-
-            # Pixel à droite du bord droite : src[y+(h//2), x+w+i_]
-            # à gauche du bord gauche : src[y+(h//2), x-i_]
-            # au dessus du bord supérieur : src[y-i_, x+(w//2)]
-            # en dessous du bord inférieur : src[y+h+i_, x+(w//2)]
-
-            for i_ in range(1,6):
-                try:
-                    pxl_east = src[y+(h//2), x+w+i_]
-                    pxl_west = src[y+(h//2), x-i_]
-                    pxl_north = src[y-i_, x+(w//2)]
-                    pxl_south = src[y+h+i_, x+(w//2)]
-                except Exception as exc: 
-                    continue
-
-                if sum(pxl_east)-255 < 240 : # Si ligne noire à l'Est alors vert à l'Ouest
-                    directions["West"]+=1
-                if sum(pxl_west)-255 < 240 :
-                    directions["East"]+=1
-                if sum(pxl_north)-255 < 240 : # Même logique, si ligne noire au nord alors carré au Sud 
-                    directions["South"] += 1
-                if sum(pxl_south)-255 < 240 : 
-                    directions["North"] += 1
-
-            list_green_squares.append(directions)
-
-
-
-
-            cv.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 2)
+class Cam:
+    def __init__(self):
+        self.picam = Picamera2()
             
-    list_final_directions = []
+    def camera_setup(self, length=960, height=540):
+        self.picam.configure(self.picam.create_preview_configuration({"size": (length,height)}))
+        self.picam.start_preview(Preview.NULL)
+        self.picam.start()
 
-    for elt in list_green_squares:
-        if elt["South"]>elt["North"]:
-            if elt["East"]>elt["West"]:
-                list_final_directions.append("S-E")
+    def take_picture(self):
+        array = self.picam.capture_array()
+        return array
+
+
+
+    def show_image(self, src):
+        src = cv.resize(src, (960,540))
+        cv.namedWindow("NAMeC",cv.WND_PROP_FULLSCREEN)
+        cv.setWindowProperty("NAMeC",cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
+        cv.imshow("NAMeC", src)
+        cv.waitKey(0)
+
+    #-----------------------------------
+
+    @staticmethod  
+    def process_image(src):
+        hsv = cv.cvtColor(src, cv.COLOR_BGR2HSV)
+
+        lower_green = np.array([40, 20, 50])
+        upper_green = np.array([90, 255, 255])
+
+        # create a mask for green color
+        mask_green = cv.inRange(hsv, lower_green, upper_green)
+        return mask_green
+
+    @staticmethod
+    def get_img_direction(src, mask)->list:
+
+        list_green_squares = []
+
+        contours_green, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        # loop through the green contours and draw a rectangle around them
+        for cnt in contours_green:
+            contour_area = cv.contourArea(cnt)
+            if contour_area > 2000: # Si faux positif: augmenter, si faux nÃ©gatif: rÃ©duire. Default: 1000
+                x, y, w, h = cv.boundingRect(cnt)
+
+                directions = {
+                    "South" : 0,
+                    "North" : 0,
+                    "West" : 0,
+                    "East" : 0
+                }
+
+                # Pixel à droite du bord droite : src[y+(h//2), x+w+i_]
+                # à gauche du bord gauche : src[y+(h//2), x-i_]
+                # au dessus du bord supérieur : src[y-i_, x+(w//2)]
+                # en dessous du bord inférieur : src[y+h+i_, x+(w//2)]
+
+                for i_ in range(1,6):
+                    try:
+                        pxl_east = src[y+(h//2), x+w+i_]
+                        pxl_west = src[y+(h//2), x-i_]
+                        pxl_north = src[y-i_, x+(w//2)]
+                        pxl_south = src[y+h+i_, x+(w//2)]
+                    except Exception as exc: 
+                        continue
+
+                    if sum(pxl_east)-255 < 240 : # Si ligne noire à l'Est alors vert à l'Ouest
+                        directions["West"]+=1
+                    if sum(pxl_west)-255 < 240 :
+                        directions["East"]+=1
+                    if sum(pxl_north)-255 < 240 : # Même logique, si ligne noire au nord alors carré au Sud 
+                        directions["South"] += 1
+                    if sum(pxl_south)-255 < 240 : 
+                        directions["North"] += 1
+
+                list_green_squares.append(directions)
+
+
+
+
+                cv.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                
+        list_final_directions = []
+
+        for elt in list_green_squares:
+            if elt["South"]>elt["North"]:
+                if elt["East"]>elt["West"]:
+                    list_final_directions.append("S-E")
+                else:
+                    list_final_directions.append("S-W")
+                # else:
+                #     if elt["East"]>elt["West"]:
+                #         list_final_directions.append("N-E")
+                #     else:
+                #         list_final_directions.append("N-W")
+
+        if not len(list_final_directions):
+            print("Rien?!")
+        if len(list_final_directions)==1:
+            print(list_final_directions[0])
+            if list_final_directions[0]=="S-W":
+                print("GAUCHE !")
             else:
-                list_final_directions.append("S-W")
-            # else:
-            #     if elt["East"]>elt["West"]:
-            #         list_final_directions.append("N-E")
-            #     else:
-            #         list_final_directions.append("N-W")
-
-    if not len(list_final_directions):
-        print("Rien?!")
-    if len(list_final_directions)==1:
-        print(list_final_directions[0])
-        if list_final_directions[0]=="S-W":
-            print("GAUCHE !")
+                print("DROITE !")
         else:
-            print("DROITE !")
-    else:
-        if "S-E" and "S-W" in list_final_directions:
-            print("S-Both")
-            print("DEMI TOUR !")
-    
+            if "S-E" and "S-W" in list_final_directions:
+                print("S-Both")
+                print("DEMI TOUR !")
+        
 
-    
-            # cv.circle(src, center_of_rectangle, 4, (255, 0, 0), 4)
-            # cv.line(src, (src.shape[1]//2, src.shape[0]), center_of_rectangle,(0,0,255),2)
-    return src
-
-if __name__=="__main__":
-    picam2 = Picamera2()
-    camera_setup(picam2)
-    for _ in range(1000):
-        img = take_picture(picam2)
-        msk = process_image(img)
-        res = get_img_direction(img, msk)
-    
+        
+                # cv.circle(src, center_of_rectangle, 4, (255, 0, 0), 4)
+                # cv.line(src, (src.shape[1]//2, src.shape[0]), center_of_rectangle,(0,0,255),2)
+        return (src, list_final_directions)
 
 
 
