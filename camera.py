@@ -27,11 +27,6 @@ class Cam:
         cv.waitKey(0)
 
     def save_image(self, src):
-        src = cv.resize(src, (960,540))
-        # cv.namedWindow("NAMeC",cv.WND_PROP_FULLSCREEN)
-        # cv.setWindowProperty("NAMeC",cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
-        # cv.imshow("NAMeC", src)
-        # cv.waitKey(0)
         cv.imwrite(f"output{random.randint(1, random.randint(1,10000000))}.png",src)
 
     #-----------------------------------
