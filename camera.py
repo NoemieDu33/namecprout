@@ -8,24 +8,18 @@ class Cam:
     def __init__(self):
         self.picam = Picamera2()
             
-    def camera_setup(self, length=1640, height=922):
-        self.picam.configure(self.picam.create_preview_configuration({"size": (length,height)}))
+    def camera_setup(self, length=1532, height=864):
+        modes = self.picam.sensor_modes
+        mode = modes[0]
+        config = self.picam.create_preview_configuration(sensor={'output_size': mode['size']})
+        self.picam.configure(config)
         self.picam.start_preview(Preview.NULL)
         self.picam.start()
 
     def take_picture(self):
         array = self.picam.capture_array()
-        small = cv.resize(array, (0,0), fx=0.5, fy=0.5) 
-        return small
-
-
-
-    def show_image(self, src):
-        src = cv.resize(src, (400,400))
-        cv.namedWindow("NAMeC",cv.WND_PROP_FULLSCREEN)
-        cv.setWindowProperty("NAMeC",cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
-        cv.imshow("NAMeC", src)
-        cv.waitKey(0)
+        # array = cv.resize(array, (0,0), fx=0.5, fy=0.5) 
+        return array
 
     def save_image(self, src):
         cv.imwrite(f"output{random.randint(1, random.randint(1,10000000))}.png",src)
