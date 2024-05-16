@@ -27,7 +27,7 @@ class Move:
 
 if __name__=="__main__":
     mv = Move()
-    for _ in range(50):
+    for _ in range(30):
         mv.detect_green()
         time.sleep(0.2)
     mv.end_this()
