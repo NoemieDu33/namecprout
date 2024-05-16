@@ -17,7 +17,7 @@ class Move:
     def detect_green(self):
         src = self.__pc.take_picture()
         msk = self.__pc.process_image(src)
-        res = self.__pc.get_img_direction(src=src, msk=msk)[1]
+        res = self.__pc.get_img_direction(src=src, mask=msk)[1]
 
 class Detect:
     def __init__(self):
