@@ -22,7 +22,7 @@ class Move:
         self.final, res = self.__pc.get_img_direction(src=src, mask=msk)
 
     def end_this(self):
-        if not (isinstance(self.final, None)):
+        if self.final!=None:
             self.__pc.save_image(src=self.final)
     
 
