@@ -15,6 +15,8 @@ class Cam:
         # self.picam.configure(config)
         cfg = self.picam.create_still_configuration()
         self.picam.configure(cfg)
+        self.picam.hflip = True
+        self.picam.vflip = True
         # self.picam.start_preview(Preview.NULL)
         self.picam.start()
 
