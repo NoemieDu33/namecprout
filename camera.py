@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 from picamera2 import MappedArray, Picamera2, Preview
+from libcamera import Transform
 import math
 import sys, random
 
@@ -13,7 +14,7 @@ class Cam:
         # mode = modes[0]
         # config = self.picam.create_preview_configuration(sensor={'output_size': mode['size']})
         # self.picam.configure(config)
-        cfg = self.picam.create_still_configuration()
+        cfg = self.picam.create_still_configuration(transform=Transform(hflip=1, vflip=1))
         self.picam.configure(cfg)
         # self.picam.hflip = True
         # self.picam.vflip = True
