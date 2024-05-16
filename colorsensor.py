@@ -31,7 +31,7 @@ def loop():
         time.sleep(0.3)
         start = time.time()
         for impulse_count in range(NUM_CYCLES):
-            GPIO.wait_for_it(signal)
+            wait_for_it(signal)
         duration = time.time() - start      #seconds to run for loop
         red  = NUM_CYCLES / duration   #in Hz
         print("red value - ",red)
@@ -41,7 +41,7 @@ def loop():
         time.sleep(0.3)
         start = time.time()
         for impulse_count in range(NUM_CYCLES):
-            GPIO.wait_for_it(signal)
+            wait_for_it(signal)
         duration = time.time() - start
         blue = NUM_CYCLES / duration
         print("blue value - ",blue)
@@ -51,7 +51,7 @@ def loop():
         time.sleep(0.3)
         start = time.time()
         for impulse_count in range(NUM_CYCLES):
-            GPIO.wait_for_it(signal)
+            wait_for_it(signal)
         duration = time.time() - start
         green = NUM_CYCLES / duration
         print("green value - ",green)
