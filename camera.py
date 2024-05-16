@@ -9,11 +9,13 @@ class Cam:
         self.picam = Picamera2()
             
     def camera_setup(self, length=1532, height=864):
-        modes = self.picam.sensor_modes
-        mode = modes[0]
-        config = self.picam.create_preview_configuration(sensor={'output_size': mode['size']})
-        self.picam.configure(config)
-        self.picam.start_preview(Preview.NULL)
+        # modes = self.picam.sensor_modes
+        # mode = modes[0]
+        # config = self.picam.create_preview_configuration(sensor={'output_size': mode['size']})
+        # self.picam.configure(config)
+        cfg = self.picam.create_still_configuration()
+        self.picam.cinfigure(cfg)
+        # self.picam.start_preview(Preview.NULL)
         self.picam.start()
 
     def take_picture(self):
