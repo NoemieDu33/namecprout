@@ -19,10 +19,14 @@ class Move:
         src = self.__pc.take_picture()
         msk = self.__pc.process_image(src)
         res = self.__pc.get_img_direction(src=src, mask=msk)[1]
+
+    def end_this(self):
+        self.__pc.save_image()
     
 
 if __name__=="__main__":
     mv = Move()
-    for _ in range(100):
+    for _ in range(50):
         mv.detect_green()
         time.sleep(0.2)
+    mv.end_this()
