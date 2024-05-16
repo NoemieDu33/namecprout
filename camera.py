@@ -20,7 +20,7 @@ class Cam:
 
     def take_picture(self):
         array = self.picam.capture_array()
-        # array = cv.resize(array, (0,0), fx=0.5, fy=0.5) 
+        array = cv.resize(array, (0,0), fx=0.2, fy=0.2) 
         return array
 
     def save_image(self, src):
@@ -86,7 +86,7 @@ class Cam:
 
 
 
-                cv.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                cv.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 3)
                 
         list_final_directions = []
 
