@@ -4,12 +4,13 @@ from picamera2 import MappedArray, Picamera2, Preview
 from libcamera import Transform
 import math
 import sys, random
+from datetime import datetime
 
 class Cam:
     def __init__(self):
         self.picam = Picamera2()
             
-    def camera_setup(self, length=1532, height=864):
+    def camera_setup(self):
         # modes = self.picam.sensor_modes
         # mode = modes[0]
         # config = self.picam.create_preview_configuration(sensor={'output_size': mode['size']})
@@ -27,7 +28,7 @@ class Cam:
         return array
 
     def save_image(self, src):
-        cv.imwrite(f"output{random.randint(1, random.randint(1,10000000))}.png",src)
+        cv.imwrite(f"output_{datetime.now()}.png",src)
 
     #-----------------------------------
 
@@ -35,7 +36,7 @@ class Cam:
     def process_image(src):
         hsv = cv.cvtColor(src, cv.COLOR_BGR2HSV)
 
-        lower_green = np.array([40, 20, 50])
+        lower_green = np.array([25, 120, 25])
         upper_green = np.array([90, 255, 255])
 
         # create a mask for green color
