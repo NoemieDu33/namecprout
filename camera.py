@@ -4,10 +4,11 @@ imps = True
 try:
     from picamera2 import MappedArray, Picamera2, Preview
     from libcamera import Transform
+    import RPi.GPIO as GPIO
 except Exception:
     imps = False
     print("(imports) WARNING: picamera2 / libcamera librairies were not loaded.\nCamera mode will be disabled.")
-import math
+import math, time
 import sys, random
 from datetime import datetime
 
@@ -16,7 +17,9 @@ class Cam:
         self.img = sys.argv[1]
         if isinstance(self.img, str) and self.img!="take":
             self.img = cv.imread(f"{sys.argv[1]}")
-
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(17,GPIO.OUT)
+        GPIO.setup(27,GPIO.OUT)
             
         if imps:
             self.picam = Picamera2()
@@ -62,7 +65,8 @@ class Cam:
             exit()
 
     def save_image(self, src):
-        cv.imwrite(f"output_{datetime.now()}.png",src)
+        cv.imwrite(f"unedited_{str(datetime.now())[10:]}.png",self.img_c)
+        cv.imwrite(f"output_{str(datetime.now())[10:]}.png",src)
 
     #-----------------------------------
 
@@ -79,7 +83,7 @@ class Cam:
     def get_img_direction(self, mask)->list:
 
         list_green_squares = []
-
+        res=None
         contours_green, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
         # loop through the green contours and draw a rectangle around them
         for cnt in contours_green:
@@ -151,8 +155,11 @@ class Cam:
                     list_final_directions.append("N-E")
                 else:
                     list_final_directions.append("N-W")
+        GPIO.output(27,GPIO.HIGH)
         if not len(list_final_directions):
             print("(Detect) : No green tile.")
+            GPIO.output(27,GPIO.LOW)
+            time.sleep(0.1)
         while "N-W" in list_final_directions:
             list_final_directions.remove("N-W")
             print("(Detect) : N-W green tile detected and removed.")
@@ -178,12 +185,20 @@ class Cam:
 
 
 if __name__=="__main__":
+    time.sleep(1)
     c = Cam()
+    GPIO.output(17,GPIO.HIGH)
+    GPIO.output(27,GPIO.LOW)
+    time.sleep(1)
     c.camera_setup()
-    c.take_picture()
-    msk = c.process_image()
-    res = c.get_img_direction(mask=msk)
-    c.save_image(res[0])
+    for _ in range(30):
+        c.take_picture()
+        msk = c.process_image()
+        res = c.get_img_direction(mask=msk)
+    if res is not None:
+        c.save_image(res[0])
+    GPIO.output(17,GPIO.LOW)
+    GPIO.cleanup()
 
 
 
