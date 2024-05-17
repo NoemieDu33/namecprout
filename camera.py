@@ -1,16 +1,32 @@
 import numpy as np
 import cv2 as cv
-from picamera2 import MappedArray, Picamera2, Preview
-from libcamera import Transform
+imps = True
+try:
+    from picamera2 import MappedArray, Picamera2, Preview
+    from libcamera import Transform
+except Exception:
+    imps = False
+    print("(imports) WARNING: picamera2 / libcamera librairies were not loaded.\nCamera mode will be disabled.")
 import math
 import sys, random
 from datetime import datetime
 
 class Cam:
     def __init__(self):
-        self.picam = Picamera2()
+        self.img = sys.argv[1]
+        if isinstance(self.img, str) and self.img!="take":
+            self.img = cv.imread(f"{sys.argv[1]}")
+
+            
+        if imps:
+            self.picam = Picamera2()
+        self.img_f = None
+        self.img_c = None
             
     def camera_setup(self):
+        if not imps:
+            print("(camera_setup) WARNING: Camera modules aren't loaded!")
+            return False
         # modes = self.picam.sensor_modes
         # mode = modes[0]
         # config = self.picam.create_preview_configuration(sensor={'output_size': mode['size']})
@@ -23,29 +39,44 @@ class Cam:
         self.picam.start()
 
     def take_picture(self):
-        array = self.picam.capture_array()
-        array = cv.resize(array, (0,0), fx=0.2, fy=0.2) 
-        return array
+        if imps and self.img=="take":
+            try:
+                array = self.picam.capture_array()
+                array = cv.resize(array, (0,0), fx=0.2, fy=0.2)
+                self.img_c = np.copy(array)
+                self.img_f = cv.cvtColor(array, cv.COLOR_RGB2GRAY) 
+                return array
+            except Exception:
+                print("FATAL: Picture couldn't be taken.\nIs the camera set up propely?\nDid you do camera_setup()?")
+                exit()
+        elif not imps and not isinstance(self.img, str):
+            try:
+                self.img_c = np.copy(self.img)
+                self.img_f =cv.cvtColor(self.img, cv.COLOR_RGB2GRAY)
+                return self.img
+            except Exception:
+                print(f"FATAL: Could not load image \"{sys.argv[1]}\".\nDid you forget the extension?\nDid you mistype the name?")
+                exit()
+        else:
+            print("FATAL: Program started as take picture mode\nBut couldn't load camera modules.\nDoes it run on Raspberry?")
+            exit()
 
     def save_image(self, src):
         cv.imwrite(f"output_{datetime.now()}.png",src)
 
     #-----------------------------------
 
-    @staticmethod  
-    def process_image(src):
-        hsv = cv.cvtColor(src, cv.COLOR_BGR2HSV)
+    def process_image(self):
+        hsv = cv.cvtColor(self.img_c, cv.COLOR_BGR2HSV)
 
-        lower_green = np.array([25, 120, 25])
+        lower_green = np.array([25, 40, 25])
         upper_green = np.array([90, 255, 255])
 
         # create a mask for green color
         mask_green = cv.inRange(hsv, lower_green, upper_green)
         return mask_green
 
-    @staticmethod
-    def get_img_direction(src, mask)->list:
-        print("-----\nBEGIN PRINT")
+    def get_img_direction(self, mask)->list:
 
         list_green_squares = []
 
@@ -56,6 +87,10 @@ class Cam:
             if contour_area > 2000: # Si faux positif: augmenter, si faux nÃ©gatif: rÃ©duire. Default: 1000
                 x, y, w, h = cv.boundingRect(cnt)
 
+                im_bw = cv.threshold(self.img_f, 128, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)[1]
+                res = cv.bitwise_or(im_bw, mask)
+                res = cv.cvtColor(res, cv.COLOR_GRAY2RGB)
+
                 directions = {
                     "South" : 0,
                     "North" : 0,
@@ -63,38 +98,43 @@ class Cam:
                     "East" : 0
                 }
 
-                # Pixel à droite du bord droite : src[y+(h//2), x+w+i_]
-                # à gauche du bord gauche : src[y+(h//2), x-i_]
-                # au dessus du bord supérieur : src[y-i_, x+(w//2)]
-                # en dessous du bord inférieur : src[y+h+i_, x+(w//2)]
+                th = 50 # Baisser si mauvais placement des cardinaux du carré (plusieurs cardinaux opposés >0)
+                        # Augmenter si aucun cardinal (plusieurs cardinaux opposés==0)
+                # N'A UN EFFET QUE SI L'IMAGE ANALYSEE N'EST PAS BINARISEE.
 
-                for i_ in range(1,6):
+                for i_ in range(1,10):
                     try:
-                        pxl_east = src[y+(h//2), x+w+i_]
-                        pxl_west = src[y+(h//2), x-i_]
-                        pxl_north = src[y-i_, x+(w//2)]
-                        pxl_south = src[y+h+i_, x+(w//2)]
+                        pxl_east = res[y+(h//2), x+w+i_]
                     except Exception as exc: 
-                        continue
+                        pxl_east = (255,255,255,255)
+                    try:
+                        pxl_west = res[y+(h//2), x-i_]
+                    except Exception as exc: 
+                        pxl_west = (255,255,255,255)
+                    try:
+                        pxl_north = res[y-i_, x+(w//2)]
+                    except Exception as exc: 
+                        pxl_north = (255,255,255,255)
+                    try:
+                        pxl_south = res[y+h+i_, x+(w//2)]
+                    except Exception as exc: 
+                        pxl_south = (255,255,255,255)
 
-                    if sum(pxl_east)-255 < 240 : # Si ligne noire à l'Est alors vert à l'Ouest
+                    if sum(pxl_east)-255 < th : # Si ligne noire à l'Est alors vert à l'Ouest
                         directions["West"]+=1
-                    if sum(pxl_west)-255 < 240 :
+                    if sum(pxl_west)-255 < th :
                         directions["East"]+=1
-                    if sum(pxl_north)-255 < 240 : # Même logique, si ligne noire au nord alors carré au Sud 
+                    if sum(pxl_north)-255 < th : # Même logique, si ligne noire au nord alors carré au Sud 
                         directions["South"] += 1
-                    if sum(pxl_south)-255 < 240 : 
+                    if sum(pxl_south)-255 < th : 
                         directions["North"] += 1
 
                 list_green_squares.append(directions)
-
-
-
-
-                cv.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 3)
+                cv.rectangle(res, (x, y), (x + w, y + h), (0, 255, 0), -1)
+                
                 
         list_final_directions = []
-        print(f"{list_green_squares=}", "\n-")
+        #print(f"{list_green_squares=}", "\n-")
         for elt in list_green_squares:
             if elt["South"]>elt["North"]:
                 if elt["East"]>elt["West"]:
@@ -107,27 +147,52 @@ class Cam:
                 #     else:
                 #         list_final_directions.append("N-W")
             else:
-                print("North")
+                if elt["East"]>elt["West"]:
+                    list_final_directions.append("N-E")
+                else:
+                    list_final_directions.append("N-W")
         if not len(list_final_directions):
-            print("Rien?!")
+            print("(Detect) : No green tile.")
+        while "N-W" in list_final_directions:
+            list_final_directions.remove("N-W")
+            print("(Detect) : N-W green tile detected and removed.")
+        while "N-E" in list_final_directions:
+            list_final_directions.remove("N-E")
+            print("(Detect) : N-E green time detected and removed.")
         if len(list_final_directions)==1:
-            print(list_final_directions[0])
+            
             if list_final_directions[0]=="S-W":
-                print("GAUCHE !")
+                print("(Detect) : Turn left.")
             else:
-                print("DROITE !")
+                print("(Detect) : Turn right.")
         else:
             if "S-E" and "S-W" in list_final_directions:
-                print("S-Both")
-                print("DEMI TOUR !")
+                print("(Detect) : U-Turn.")
         
 
         
                 # cv.circle(src, center_of_rectangle, 4, (255, 0, 0), 4)
                 # cv.line(src, (src.shape[1]//2, src.shape[0]), center_of_rectangle,(0,0,255),2)
-        print(f"{list_final_directions=}")
-        print("END PRINT")
-        return (src, list_final_directions)
+        #print(f"{list_final_directions=}")
+        return (res, list_final_directions)
+
+
+if __name__=="__main__":
+    c = Cam()
+    c.camera_setup()
+    c.take_picture()
+    msk = c.process_image()
+    res = c.get_img_direction(mask=msk)
+    c.save_image(res[0])
+
+
+
+
+
+
+
+
+
 
 
 
