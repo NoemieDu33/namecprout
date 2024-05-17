@@ -16,8 +16,9 @@ class Move:
 
     def detect_green(self):
         src = self.__pc.take_picture()
-        msk = self.__pc.process_image(src)
-        res = self.__pc.get_img_direction(src=src, mask=msk)[1]
+        msk = self.__pc.process_image()
+        res = self.__pc.get_img_direction(mask=msk)
+        self.__pc.save_image(res[0])
 
 class Detect:
     def __init__(self):
@@ -85,3 +86,7 @@ class Detect:
                     self.mv.straight(100) #Pas de vert = on IGNORE les intersections !!!
         
         #<3
+
+if __name__=="__main__":
+    mv = Move()
+    mv.detect_green()
