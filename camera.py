@@ -7,7 +7,7 @@ try:
     import RPi.GPIO as GPIO
 except Exception:
     imps = False
-    print("(imports) WARNING: picamera2 / libcamera librairies were not loaded.\nCamera mode will be disabled.")
+    print("(imports) WARNING: picamera2 / libcamera / RPi.GPIO librairies were not loaded.\nCamera mode will be disabled.")
 import math, time
 import sys, random
 from datetime import datetime
@@ -20,6 +20,8 @@ class Cam:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(17,GPIO.OUT)
         GPIO.setup(27,GPIO.OUT)
+        GPIO.setup(22,GPIO.OUT)
+        GPIO.setup(23,GPIO.OUT)
             
         if imps:
             self.picam = Picamera2()
@@ -155,25 +157,34 @@ class Cam:
                     list_final_directions.append("N-E")
                 else:
                     list_final_directions.append("N-W")
-        GPIO.output(27,GPIO.HIGH)
         if not len(list_final_directions):
             print("(Detect) : No green tile.")
-            GPIO.output(27,GPIO.LOW)
+            GPIO.output([17,22,23,27],GPIO.LOW)
             time.sleep(0.1)
         while "N-W" in list_final_directions:
             list_final_directions.remove("N-W")
             print("(Detect) : N-W green tile detected and removed.")
+            GPIO.output([22,23,27],GPIO.LOW)                            # 17 NW ; 22 SW ; 27 NE ; 23 SE
+            GPIO.output(17,GPIO.HIGH)
         while "N-E" in list_final_directions:
             list_final_directions.remove("N-E")
             print("(Detect) : N-E green time detected and removed.")
+            GPIO.output([22,23,17],GPIO.LOW)                            # 17 NW ; 22 SW ; 27 NE ; 23 SE
+            GPIO.output(27,GPIO.HIGH)
         if len(list_final_directions)==1:
             
             if list_final_directions[0]=="S-W":
                 print("(Detect) : Turn left.")
+                GPIO.output([17,23,27],GPIO.LOW)                            # 17 NW ; 22 SW ; 27 NE ; 23 SE
+                GPIO.output(22,GPIO.HIGH)
             else:
                 print("(Detect) : Turn right.")
+                GPIO.output([17,22,27],GPIO.LOW)                            # 17 NW ; 22 SW ; 27 NE ; 23 SE
+                GPIO.output(23,GPIO.HIGH)
         else:
             if "S-E" and "S-W" in list_final_directions:
+                GPIO.output([17,27],GPIO.LOW)                            # 17 NW ; 22 SW ; 27 NE ; 23 SE
+                GPIO.output([22,23],GPIO.HIGH)
                 print("(Detect) : U-Turn.")
         
 
@@ -187,9 +198,6 @@ class Cam:
 if __name__=="__main__":
     time.sleep(1)
     c = Cam()
-    GPIO.output(17,GPIO.HIGH)
-    GPIO.output(27,GPIO.LOW)
-    time.sleep(1)
     c.camera_setup()
     for _ in range(30):
         c.take_picture()
@@ -197,7 +205,7 @@ if __name__=="__main__":
         res = c.get_img_direction(mask=msk)
     if res is not None:
         c.save_image(res[0])
-    GPIO.output(17,GPIO.LOW)
+    GPIO.output([17,22,23,27],GPIO.LOW)
     GPIO.cleanup()
 
 
