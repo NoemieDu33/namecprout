@@ -1,4 +1,5 @@
 from camera import Cam
+from line import Line
 
 class Move:
     def __init__(self):
@@ -23,23 +24,17 @@ class Move:
 class Detect:
     def __init__(self):
         self.mv = Move()
-        self.sensors = 0
-        self.left = 0
-        self.leftmost = 0
-        self.center = 0
-        self.centermost = 0
-        self.right = 0
-        self.rightmost = 0
-        self.sides = 0
+        self.ls = Line()
 
-    
     def update(self):
-        pass
+        self.ls.update_sensor()
 
     def main(self):
         while True:
             self.update()
-            if all(self.sensors): #intersection
+
+            if all(self.ls.sensors): #intersection [xxxxxxxx]
+
                 if not self.mv.detect_green() or self.mv.detect_green[0]=="North": 
                     #S'il n'y a pas de vert avant l'intersection: cas simple
                     self.mv.straight(10) #avancer un peu puis re détecter car impossible
@@ -58,18 +53,18 @@ class Detect:
                     self.mv.straight(10)
 
 
-            elif any(self.center) and not any(self.sides): #ligne noire droite au centre
+            elif any(self.ls.center) and not any(self.ls.sides): #ligne noire droite au centre [___xx___]
                 self.mv.straight(100)                         #le cas de base, on avance
                                                            #Même pas besoin de detect du vert
 
 
 
-            elif not any(self.sensors): #aucune ligne
+            elif not any(self.ls.sensors): #aucune ligne [________]
                 pass                    #Le plus opti cest quoi?
 
 
 
-            elif not any(self.left) and all(self.right): #ligne noire à droite
+            elif not any(self.ls.left) and all(self.ls.right): #ligne noire à droite [_____xxx]
                 if self.mv.detect_green==("South","East"):  #Si ya du vert à droite
                     self.mv.turn_right(100)
                     self.mv.straight(10)
@@ -78,7 +73,7 @@ class Detect:
 
 
 
-            elif not any(self.right) and all(self.left): #ligne noire à gauche
+            elif not any(self.ls.right) and all(self.ls.left): #ligne noire à gauche [xxx_____]
                 if self.mv.detect_green==("South","West"):  #Si ya du vert à gauche
                     self.mv.turn_left(100)
                     self.mv.straight(10)
