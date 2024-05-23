@@ -8,10 +8,11 @@ class Line:
         self.control = 26
         self.sensors = [0,0,0,0,0,0,0,0] # permet de stocker l'état des capteur 
         self.obstaclePIN = 1
-        self.left = self.sensors[0:4]
-        self.right = self.sensors[4:]
-        self.center = self.sensors[2:6]
-
+        self.left = self.sensors[0:3]
+        self.right = self.sensors[5:]
+        self.center = self.sensors[3:5]
+        self.sides = self.sensors[0:3] + self.sensors[5:]
+        
         gpio.setmode(gpio.BCM)
 
         gpio.setup(self.capt1, gpio.IN)
