@@ -5,7 +5,7 @@ if __name__ == '__main__':
     ser.reset_input_buffer()
 
     while True:
-        ser.write(b"Hello from Raspberry Pi!\n")
+        ser.write(b"Straight\n")
         time.sleep(1)
         ser.close()
         exit()
