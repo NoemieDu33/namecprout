@@ -24,7 +24,7 @@ class Motor:
             #print("Low signal step")
             time.sleep(delay)
         gpio.output([self.dir_pin, self.step_pin], gpio.LOW)
-        gpio.cleanup()
+        
 
 
 if __name__=="__main__":
