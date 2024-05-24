@@ -11,14 +11,14 @@ class Motor:
         gpio.setup(self.dir_pin,gpio.OUT)
 
     def one_full_turn(self):
-        delay = 0.0005 #500
+        delay = 0.0005 #500microsecods
         gpio.output(self.dir_pin, gpio.HIGH)
         for x in range(200):
             gpio.output(self.step_pin, gpio.HIGH)
-            print("High signal step")
+            #print("High signal step")
             time.sleep(delay)
             gpio.output(self.step_pin, gpio.LOW)
-            print("Low signal step")
+            #print("Low signal step")
             time.sleep(delay)
 
 
