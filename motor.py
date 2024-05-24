@@ -16,7 +16,7 @@ class Motor:
         for x in range(200):
             gpio.output(self.step_pin, gpio.HIGH)
             time.sleep(delay/1000)
-            gpio.outputt(self.step_pin, gpio.LOW)
+            gpio.output(self.step_pin, gpio.LOW)
             time.sleep(delay/1000)
 
 
