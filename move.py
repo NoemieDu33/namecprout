@@ -2,8 +2,8 @@ from camera import Cam
 from line import Line
 
 class Move:
-    def __init__(self):
-        self.__pc = Cam()
+    def __init__(self, pc:Cam):
+        self.__pc = pc
         self.__pc.camera_setup()
         
     def turn_left(self,t):
@@ -22,9 +22,9 @@ class Move:
         self.__pc.save_image(res[0])
 
 class Detect:
-    def __init__(self):
-        self.mv = Move()
-        self.ls = Line()
+    def __init__(self, mv:Move, ls:Line):
+        self.mv = mv
+        self.ls = ls
 
     def update(self):
         self.ls.update_sensor()
