@@ -7,3 +7,5 @@ if __name__ == '__main__':
     while True:
         ser.write(b"Hello from Raspberry Pi!\n")
         time.sleep(1)
+        ser.close()
+        exit()
