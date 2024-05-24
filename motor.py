@@ -7,7 +7,7 @@ class Motor:
         self.step_pin = 13 #13
         self.dir_pin = 17   #1
 
-        #gpio.setup(self.step_pin,gpio.OUT)
+        gpio.setup(self.step_pin,gpio.OUT)
         self.pwm = gpio.PWM(self.step_pin, 0.5)
         gpio.setup(self.dir_pin,gpio.OUT)
 
