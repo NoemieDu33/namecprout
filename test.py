@@ -5,8 +5,7 @@ import time
 mot = Motor()
 mov = Move(None, mot)
 
-print("straight")
+mov.straight(3)
+mov.turn_left(2)
 mov.straight(2)
-print("stop")
-mov.stop(2)
 mov.end()
