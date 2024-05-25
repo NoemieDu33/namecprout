@@ -14,9 +14,10 @@ GPIO.setup(24, GPIO.OUT)
 l0 = [27,22,23,24]
 l1 = []
 
-
+print(sgn)
 for i in range(len(sgn)):
     if int(sgn[i])==1:
+        print(int(l0[i]))
         GPIO.output(int(l0[i]), GPIO.HIGH)
 
 sleep(1)
