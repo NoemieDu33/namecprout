@@ -1,9 +1,5 @@
-from line import Line
-import time, RPi.GPIO
+from motor import Motor
+import time
 
-li = Line()
-for _ in range(100):
-    li.update_sensor()
-    print(li.sensors)
-    time.sleep(0.5)
-RPi.GPIO.cleanup()
+mo = Motor()
+mo.send_signal(1,"1010")
