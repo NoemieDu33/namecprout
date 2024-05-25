@@ -23,17 +23,23 @@ class Motor:
 
 
     def send_signal(self, t, args):
+        if_sleep = False
         for i in range(len(args)):
             if i==0 and int(args[i])==1:
-                gpio.output(27,gpio.HIGH)   
+                gpio.output(27,gpio.HIGH)
+                if_sleep = True   
             if i==1 and int(args[i])==1:
                 gpio.output(22,gpio.HIGH)   
+                if_sleep = True
             if i==2 and int(args[i])==1:
                 gpio.output(23,gpio.HIGH)   
+                if_sleep = True
             if i==3 and int(args[i])==1:
                 gpio.output(24,gpio.HIGH)  
+                if_sleep = True
 
-        time.sleep(t)
+        if if_sleep:
+            time.sleep(t)
 
         gpio.output(27,gpio.LOW)
         gpio.output(22,gpio.LOW)
