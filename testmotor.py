@@ -2,7 +2,13 @@ import sys
 from time import sleep        
 import RPi.GPIO as GPIO        
 
-sgn = str(sys.argv[1])
+sgn2 = str(sys.argv[1])
+sgn = []
+for i in range(len(sgn2)):
+    if int(sgn2[i])==0:
+        sgn.append(1)
+    else:
+        sgn.append(0)
 
 GPIO.setmode(GPIO.BCM)
 
@@ -16,7 +22,7 @@ l1 = []
 
 print(sgn)
 for i in range(len(sgn)):
-    if int(sgn[i])==1:
+    if sgn[i]==1:
         print(int(l0[i]))
         GPIO.output(int(l0[i]), GPIO.HIGH)
 
