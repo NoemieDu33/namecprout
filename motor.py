@@ -12,15 +12,15 @@ class Motor:
         gpio.setup(24, gpio.OUT) # arriere droit    
 
 
-    def send_signal(self, t, args):
+    def send_signal(self, args):
         if_sleep = False
         if args!="stop":
             if_sleep=True
             if args=="forward":
                 gpio.output(27, gpio.HIGH)
-                gpio.output(23, gpio.HIGH)
+                
             elif args=="right":
-                gpio.output(27, gpio.HIGH)
+                gpio.output(27, gpio.LOW)
             elif args=="left":
                 gpio.output(23, gpio.HIGH)
             elif args=="back":
@@ -30,13 +30,7 @@ class Motor:
                 gpio.output(22, gpio.HIGH)
                 gpio.output(23, gpio.HIGH)
 
-        if if_sleep:
-            time.sleep(t)
-
-        gpio.output(27,gpio.LOW)
-        gpio.output(22,gpio.LOW)
-        gpio.output(23,gpio.LOW)
-        gpio.output(24,gpio.LOW)
+        
 
     def terminate(self):
         gpio.cleanup()
