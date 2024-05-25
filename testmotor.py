@@ -17,7 +17,7 @@ l1 = []
 
 for i in range(len(sgn)):
     if int(sgn[i])==1:
-        GPIO.output(l0[i], GPIO.HIGH)
+        GPIO.output(int(l0[i]), GPIO.HIGH)
 
 sleep(1)
 GPIO.output([l0],GPIO.LOW)
