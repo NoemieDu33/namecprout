@@ -3,7 +3,7 @@ import time,sys
 import RPi.GPIO as gpio  
 
 mo = Motor()
-mo.send_signal("back")
+ 
 gpio.setmode(gpio.BCM)
 gpio.setup(27, gpio.OUT) # avant gauche
 gpio.setup(22, gpio.OUT) # arriere gauche
