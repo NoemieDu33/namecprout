@@ -4,17 +4,7 @@ import RPi.GPIO as gpio
 
 class Motor:
     def __init__(self):
-        """
-        0000 stop
 
-        0010 virage à gauche
-        1000 virage à droite
-
-        1010 avancer
-        0101 reculer
-
-        1001 / 0110 demi-tour
-        """
         gpio.setmode(gpio.BCM)
         gpio.setup(27, gpio.OUT) # avant gauche
         gpio.setup(22, gpio.OUT) # arriere gauche
