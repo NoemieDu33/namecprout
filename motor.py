@@ -22,7 +22,7 @@ class Motor:
         gpio.setup(24, gpio.OUT) # arriere droit    
 
 
-    def send_signal(t, args):
+    def send_signal(self, t, args):
         for i in range(len(args)):
             if i==0 and int(args[i])==1:
                 gpio.output(27,gpio.HIGH)   
