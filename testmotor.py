@@ -20,6 +20,9 @@ for i in range(len(sgn)):
         GPIO.output(int(l0[i]), GPIO.HIGH)
 
 sleep(1)
-GPIO.output([l0],GPIO.LOW)
+GPIO.output(27,GPIO.LOW)
+GPIO.output(22,GPIO.LOW)
+GPIO.output(23,GPIO.LOW)
+GPIO.output(24,GPIO.LOW)
 GPIO.cleanup()
 
