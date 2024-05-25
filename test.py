@@ -1,9 +1,7 @@
-from move import Move
-from motor import Motor
+from line import Line
 import time
 
-mot = Motor()
-mov = Move(None, mot)
-
-mov.straight(3)
-mov.end()
+li = Line()
+for _ in range(100):
+    li.update_sensor()
+    print(li.sensors)
