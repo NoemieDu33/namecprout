@@ -1,34 +1,46 @@
-import RPi.GPIO as gpio
-import time
+import sys
+import time       
+import RPi.GPIO as gpio  
 
 class Motor:
     def __init__(self):
+        """
+        0000 stop
+
+        0010 virage à gauche
+        1000 virage à droite
+
+        1010 avancer
+        0101 reculer
+
+        1001 / 0110 demi-tour
+        """
         gpio.setmode(gpio.BCM)
-        self.step_pin = 13 #13
-        self.dir_pin = 17   #1
-
-        gpio.setup(self.step_pin,gpio.OUT)
-        self.pwm = gpio.PWM(self.step_pin, 0.5)
-        gpio.setup(self.dir_pin,gpio.OUT)
-
-    def one_full_turn(self):
-        delay = 0.0005 #500microsecods
-        gpio.output(self.dir_pin, gpio.HIGH)
-        for x in range(200):
-            self.pwm.start(100)
-            #gpio.output(self.step_pin, gpio.HIGH)
-            #print("High signal step")
-            time.sleep(delay)
-            self.pwm.stop()
-            #gpio.output(self.step_pin, gpio.LOW)
-            #print("Low signal step")
-            time.sleep(delay)
-        gpio.output([self.dir_pin, self.step_pin], gpio.LOW)
-        
+        gpio.setup(27, gpio.OUT) # avant gauche
+        gpio.setup(22, gpio.OUT) # arriere gauche
+        gpio.setup(23, gpio.OUT) # avant droit
+        gpio.setup(24, gpio.OUT) # arriere droit    
 
 
-if __name__=="__main__":
-    mot = Motor()
-    mot.one_full_turn()
-    gpio.cleanup()
+    def send_signal(t, args):
+        for i in range(len(args)):
+            if i==0 and int(args[i])==1:
+                gpio.output(27,gpio.HIGH)   
+            if i==1 and int(args[i])==1:
+                gpio.output(22,gpio.HIGH)   
+            if i==2 and int(args[i])==1:
+                gpio.output(23,gpio.HIGH)   
+            if i==3 and int(args[i])==1:
+                gpio.output(24,gpio.HIGH)  
+
+        time.sleep(t)
+
+        gpio.output(27,gpio.LOW)
+        gpio.output(22,gpio.LOW)
+        gpio.output(23,gpio.LOW)
+        gpio.output(24,gpio.LOW)
+
+    def terminate(self):
+        gpio.cleanup()
+        exit()
 

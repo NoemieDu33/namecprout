@@ -1,6 +1,6 @@
 from move import Move, Detect
 from camera import Cam
-from accel import Accel
+# from accel import Accel
 from line import Line
 from motor import Motor
 
@@ -8,8 +8,8 @@ from motor import Motor
 # Si possible, éviter que les modèles s'appellent entre eux
 
 cam = Cam()
-mov = Move(cam)
 lin = Line()
-det = Detect(mov, lin) #classe principale
-acl = Accel()
+# acl = Accel()
 mot = Motor()
+mov = Move(cam, mot)
+det = Detect(mov, lin) #classe principale
