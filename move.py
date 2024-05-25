@@ -1,6 +1,7 @@
 from camera import Cam
 from line import Line
 from motor import Motor
+import time
 
 class Move:
     def __init__(self, pc:Cam, mt:Motor):
@@ -10,32 +11,62 @@ class Move:
         self.__mt = mt
         
     def turn_left(self,t):
-        self.__mt.send_signal(t, "0010")
+        self.__mt.send_signal(t, "left")
         
     def turn_right(self,t):
-        self.__mt.send_signal(t, "1000")
+        self.__mt.send_signal(t, "right")
 
     def u_turn(self,t):
-        self.__mt.send_signal(t, "0110")
+        self.__mt.send_signal(t, "U")
 
     def straight(self,t):
-        self.__mt.send_signal(t, "1010")
+        self.__mt.send_signal(t, "forward")
 
     def back(self,t):
-        self.__mt.send_signal(t, "0101")
+        self.__mt.send_signal(t, "back")
     
     def stop(self, t):
-        self.__mt.send_signal(t,"0000")
+        self.__mt.send_signal(t,"stop")
+    
+    def avoid_right(self):
+        self.__mt.send_signal(0.3, "back")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.2, "right")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.2, "forward")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.2, "left")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.2, "forward")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.1, "right")
+        time.sleep(0.2)
+        self.__mt.send_signal(1, "stop")
+
+    def avoid_left(self):
+        self.__mt.send_signal(0.3, "back")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.2, "left")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.2, "forward")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.2, "right")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.2, "forward")
+        time.sleep(0.2)
+        self.__mt.send_signal(0.1, "left")
+        time.sleep(0.2)
+        self.__mt.send_signal(1, "stop")
 
     def end(self):
         self.__mt.terminate()
 
-    def detect_green(self):
-        if self.__pc!=None:
-            src = self.__pc.take_picture()
-            msk = self.__pc.process_image()
-            res = self.__pc.get_img_direction(mask=msk)
-            self.__pc.save_image(res[0])
+    # def detect_green(self):
+    #     if self.__pc!=None:
+    #         src = self.__pc.take_picture()
+    #         msk = self.__pc.process_image()
+    #         res = self.__pc.get_img_direction(mask=msk)
+    #         self.__pc.save_image(res[0])
 
 class Detect:
     def __init__(self, mv:Move, ls:Line):
@@ -49,53 +80,43 @@ class Detect:
         while True:
             self.update()
 
-            if all(self.ls.sensors): #intersection [xxxxxxxx]
+            if any(self.ls.left):
+                if sum(self.ls.left)>=2:
+                    while sum(self.ls.left)>=2:
+                        self.mv.turn_left(0.2)
+                        self.ls.update_sensor()
+                    self.mv.stop()
 
-                if not self.mv.detect_green() or self.mv.detect_green[0]=="North": 
-                    #S'il n'y a pas de vert avant l'intersection: cas simple
-                    self.mv.straight(1) #avancer un peu puis re détecter car impossible
-                                      #qu'il n'y ait pas de ligne droite ensuite
-
-                elif self.mv.detect_green()==("South","Both"):
-                    self.mv.u_turn()
-                    self.mv.straight(1)
-                    
-                elif self.mv.detect_green()==("South","East"): #S'il ya du vert à droite avant l'intersection
-                    self.mv.turn_right(1) #On tourne bien à droite
-                    self.mv.straight(1)
-
-                elif self.mv.detect_green()==("South","West"): #S'il y a du vert à gauche avant l'intersection
-                    self.mv.turn_left(1) #On tourne bien à gauche
-                    self.mv.straight(1)
-
-
-            elif any(self.ls.center) and not any(self.ls.sides): #ligne noire droite au centre [___xx___]
-                self.mv.straight(1)                         #le cas de base, on avance
-                                                           #Même pas besoin de detect du vert
-
-
-
-            elif not any(self.ls.sensors): #aucune ligne [________]
-                pass                    #Le plus opti cest quoi?
-
-
-
-            elif not any(self.ls.left) and all(self.ls.right): #ligne noire à droite [_____xxx]
-                if self.mv.detect_green==("South","East"):  #Si ya du vert à droite
-                    self.mv.turn_right(1)
-                    self.mv.straight(1)
                 else:
-                    self.mv.straight(1) #Pas de vert = on IGNORE les intersections !!!
+                    while not any(self.ls.center):
+                        self.mv.turn_left(0.2)
+                        self.ls.update_sensor()
+                    self.mv.straight(0.1)
+                    self.mv.stop()
+            
+            if any(self.ls.right):
+                if sum(self.ls.right)>=2:
+                    while sum(self.ls.right)>=2:
+                        self.mv.turn_right(0.2)
+                        self.ls.update_sensor()
+                    self.mv.stop()
 
-
-
-            elif not any(self.ls.right) and all(self.ls.left): #ligne noire à gauche [xxx_____]
-                if self.mv.detect_green==("South","West"):  #Si ya du vert à gauche
-                    self.mv.turn_left(1)
-                    self.mv.straight(1)
                 else:
-                    self.mv.straight(1) #Pas de vert = on IGNORE les intersections !!!
-        
+                    while not any(self.ls.center):
+                        self.mv.turn_right(0.2)
+                        self.ls.update_sensor()
+                    self.mv.straight(0.1)
+                    self.mv.stop()
+            
+            if any(self.ls.center):
+                self.mv.straight(0.2)
+
+            else:
+                if self.ls.sensors[-1]:
+                    self.mv.turn_right(0.1)
+                elif self.ls.sensors[0]:
+                    self.mv.turn_left(0.1)
+
         #<3
 
 if __name__=="__main__":

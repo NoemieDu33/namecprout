@@ -24,19 +24,21 @@ class Motor:
 
     def send_signal(self, t, args):
         if_sleep = False
-        for i in range(len(args)):
-            if i==0 and int(args[i])==1:
-                gpio.output(27,gpio.HIGH)
-                if_sleep = True   
-            if i==1 and int(args[i])==1:
-                gpio.output(22,gpio.HIGH)   
-                if_sleep = True
-            if i==2 and int(args[i])==1:
-                gpio.output(23,gpio.HIGH)   
-                if_sleep = True
-            if i==3 and int(args[i])==1:
-                gpio.output(24,gpio.HIGH)  
-                if_sleep = True
+        if args!="stop":
+            if_sleep=True
+            if args=="forward":
+                gpio.output(27, gpio.HIGH)
+                gpio.output(23, gpio.HIGH)
+            elif args=="right":
+                gpio.output(27, gpio.HIGH)
+            elif args=="left":
+                gpio.output(23, gpio.HIGH)
+            elif args=="back":
+                gpio.output(22, gpio.HIGH)
+                gpio.output(24, gpio.HIGH)
+            elif args=="U":
+                gpio.output(22, gpio.HIGH)
+                gpio.output(23, gpio.HIGH)
 
         if if_sleep:
             time.sleep(t)
